@@ -23,7 +23,7 @@ public class AutoSizeText : MonoBehaviour
     {
         var textInfo = textComponent.GetTextInfo(textComponent.text);
 
-        var width = textInfo.textComponent.preferredWidth;
+        var width = textInfo.textComponent.preferredWidth < 580 ? textInfo.textComponent.preferredWidth : 580;
         var height = textInfo.textComponent.preferredHeight;// textGenerator.GetPreferredHeight(textComponent.text, textGenerationSettings);
 
         rectTransform.sizeDelta = new Vector2(width, height);
