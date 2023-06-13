@@ -12,10 +12,19 @@ public class TalkBanner : MonoBehaviour
     private bool isRight;
     private List<string> messageList = new List<string>();
 
-    public void Setup(string message, bool isRight)
+
+    private void Setup(string message, bool isRight)
     {
         messageText.text = message;
         this.isRight = isRight;
+
+        horizontalLayout.reverseArrangement = this.isRight;
+        horizontalLayout.childAlignment =
+            this.isRight ? TextAnchor.UpperRight : TextAnchor.UpperLeft;
+    }
+    public void Setup(TalkModel model)
+    {
+        Setup(model.message, model.isRight);
     }
 
     private void MessageLine(string input)

@@ -1,14 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 
 public class LoginTest : MonoBehaviour
 {
     [SerializeField] private Button submitButton;
-
     private string jwtToken;
+
+    public static UnityEvent<ChatData> OnResponse = new UnityEvent<ChatData>();
 
     IEnumerator Start()
     {
@@ -49,6 +51,10 @@ public class LoginTest : MonoBehaviour
         yield return requestChat.SendWebRequest();
 
         Debug.Log(requestChat.downloadHandler.text);
+
+        var chatData = JsonUtility.FromJson<ChatData>(requestChat.downloadHandler.text);
+        OnResponse?.Invoke(chatData);
+
     }
 
 
