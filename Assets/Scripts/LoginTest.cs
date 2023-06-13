@@ -1,18 +1,23 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Networking;
 
 public class LoginTest : MonoBehaviour
 {
+    [SerializeField] private Button submitButton;
+
+    private string jwtToken;
+
     IEnumerator Start()
     {
         var postData = new Dictionary<string, string>()
         {
-            { "username","test" },
-            { "password","test" },
+            { "username","user1" },
+            { "password","user1" },
         };
-        UnityWebRequest request = UnityWebRequest.Post("http://localhost:8000/api/login/", postData);
+        UnityWebRequest request = UnityWebRequest.Post("http://localhost:8000/api/login", postData);
 
         yield return request.SendWebRequest();
 
@@ -20,23 +25,31 @@ public class LoginTest : MonoBehaviour
 
         var auth = JsonUtility.FromJson<LoginData>(request.downloadHandler.text);
 
-        Debug.Log(auth.token);
+        //Debug.Log(auth);
+        Debug.Log(auth.data.token);
+        jwtToken = auth.data.token;
 
+        PanelTalkList.OnSendTalkMessage.AddListener(SendTalkButton);
+
+    }
+
+    public void SendTalkButton(string sendMessage)
+    {
+        StartCoroutine(SendTalkMessage(sendMessage));
+    }
+
+    private IEnumerator SendTalkMessage(string message)
+    {
         var postDataChat = new Dictionary<string, string>()
         {
-            { "message","Ç≤ã@åôÇ¢Ç©Ç™Ç≈Ç∑Ç©ÅH" },
+            { "message",$"{message}" },
         };
-        UnityWebRequest requestChat = UnityWebRequest.Post("http://localhost:8000/api/chat/", postDataChat);
-        requestChat.SetRequestHeader("Authorization", $"jwt {auth.token}");
+        UnityWebRequest requestChat = UnityWebRequest.Post("http://localhost:8000/api/chat/1", postDataChat);
+        requestChat.SetRequestHeader("Authorization", $"jwt {jwtToken}");
         yield return requestChat.SendWebRequest();
 
         Debug.Log(requestChat.downloadHandler.text);
-
-
     }
-    private struct LoginData
-    {
-        public string token;
-    }
+
 
 }

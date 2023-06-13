@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using anogame;
 using UnityEngine.UI;
 using TMPro;
@@ -15,6 +16,8 @@ public class PanelTalkList : UIPanel
 
     private string inputMessage;
 
+    public static UnityEvent<string> OnSendTalkMessage = new UnityEvent<string>();
+
     protected override void initialize()
     {
         submitButton.interactable = false;
@@ -28,6 +31,7 @@ public class PanelTalkList : UIPanel
             TalkBanner talkBanner = Instantiate(messageItemPrefab, contentRoot).GetComponent<TalkBanner>();
             talkBanner.Setup(inputMessage, true);
             inputField.text = "";
+            OnSendTalkMessage?.Invoke(inputMessage);
         });
     }
 

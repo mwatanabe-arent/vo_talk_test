@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using anogame;
+
 public class UIManager : MonoBehaviour
 {
     [SerializeField] private GameObject talkListPrefab;
