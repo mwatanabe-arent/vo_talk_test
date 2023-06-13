@@ -91,7 +91,7 @@ public class PanelTalkList : UIPanel
             TalkBanner talkBanner = Instantiate(messageItemPrefab, contentRoot).GetComponent<TalkBanner>();
             TalkModel model = new TalkModel()
             {
-                message = val.data.ai_response,
+                message = val.message,
                 isRight = false
             };
             talkBanner.Setup(model);

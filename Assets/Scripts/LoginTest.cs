@@ -28,8 +28,8 @@ public class LoginTest : MonoBehaviour
         var auth = JsonUtility.FromJson<LoginData>(request.downloadHandler.text);
 
         //Debug.Log(auth);
-        Debug.Log(auth.data.token);
-        jwtToken = auth.data.token;
+        Debug.Log(auth.token);
+        jwtToken = auth.token;
 
         PanelTalkList.OnSendTalkMessage.AddListener(SendTalkButton);
 
