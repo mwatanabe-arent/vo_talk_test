@@ -31,8 +31,8 @@ public class LoginTest : MonoBehaviour
         Debug.Log(auth.token);
         jwtToken = auth.token;
 
-        PanelTalkList.OnSendTalkMessage.AddListener(SendTalkButton);
-
+        //PanelTalkList.OnSendTalkMessage.AddListener(SendTalkButton);
+        PanelTalkList.OnSendTalkMessage.AddListener(InitiatorTestButton);
     }
 
     public void SendTalkButton(string sendMessage)
@@ -54,8 +54,23 @@ public class LoginTest : MonoBehaviour
 
         var chatData = JsonUtility.FromJson<ChatData>(requestChat.downloadHandler.text);
         OnResponse?.Invoke(chatData);
-
     }
+
+    public void InitiatorTestButton(string sendMessage)
+    {
+        StartCoroutine(InitiatorTest());
+    }
+    IEnumerator InitiatorTest()
+    {
+        UnityWebRequest requestChat = UnityWebRequest.Get("http://localhost:8000/api/chatinitiator/get");
+        requestChat.SetRequestHeader("Authorization", $"jwt {jwtToken}");
+        yield return requestChat.SendWebRequest();
+
+        Debug.Log(requestChat.downloadHandler.text);
+        var chatData = JsonUtility.FromJson<ChatData>(requestChat.downloadHandler.text);
+        OnResponse?.Invoke(chatData);
+    }
+
 
 
 }
