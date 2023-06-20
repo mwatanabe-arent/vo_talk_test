@@ -26,12 +26,14 @@ public class PanelTalkList : UIPanel
     [SerializeField] private Button submitButton;
     [SerializeField] private GameObject messageItemPrefab;
     [SerializeField] private Transform contentRoot;
+    [SerializeField] private Button clearButton;    // デバッグ用
 
     private TalkHistory talkHistory;// = new TalkHistory();
 
     private string inputMessage;
 
     public static UnityEvent<string> OnSendTalkMessage = new UnityEvent<string>();
+    public static UnityEvent OnSendStampMessage = new UnityEvent();
 
     private void OnDestroy()
     {
@@ -39,16 +41,16 @@ public class PanelTalkList : UIPanel
         {
             string saveString = JsonUtility.ToJson(talkHistory);
             Debug.Log(saveString);
-            PlayerPrefs.SetString("saved_message", saveString);
+            PlayerPrefs.SetString(Define.KEY_SAVED_MESSAGE, saveString);
             PlayerPrefs.Save();
         }
     }
 
     protected override void initialize()
     {
-        if (PlayerPrefs.HasKey("saved_message"))
+        if (PlayerPrefs.HasKey(Define.KEY_SAVED_MESSAGE))
         {
-            var json = PlayerPrefs.GetString("saved_message");
+            var json = PlayerPrefs.GetString(Define.KEY_SAVED_MESSAGE);
             talkHistory = JsonUtility.FromJson<TalkHistory>(json);
             Debug.Log(talkHistory.talkList.Count);
         }
@@ -85,6 +87,11 @@ public class PanelTalkList : UIPanel
             OnSendTalkMessage?.Invoke(inputMessage);
         });
 
+        stampButton.onClick.AddListener(() =>
+        {
+            OnSendStampMessage?.Invoke();
+        });
+
         LoginTest.OnResponse.RemoveAllListeners();
         LoginTest.OnResponse.AddListener((val) =>
         {
@@ -97,6 +104,8 @@ public class PanelTalkList : UIPanel
             talkBanner.Setup(model);
             talkHistory.talkList.Add(model);
         });
+
+        clearButton.onClick.AddListener(ClearMessages);
     }
 
     public void AddMessage(TalkModel model)
@@ -105,7 +114,29 @@ public class PanelTalkList : UIPanel
         talkBanner.Setup(model);
     }
 
+    private void ClearMessages()
+    {
+        var deleteList = new List<GameObject>();
+        foreach (Transform child in contentRoot)
+        {
+            if (child != contentRoot)
+            {
+                deleteList.Add(child.gameObject);
+            }
+            else
+            {
+                Debug.Log("contentRoot!!");
+            }
+        }
+        foreach (var obj in deleteList)
+        {
+            Destroy(obj);
+        }
+        PlayerPrefs.DeleteKey(Define.KEY_SAVED_MESSAGE);
+        PlayerPrefs.Save();
 
+        talkHistory = new TalkHistory();
+    }
 
 
 }
