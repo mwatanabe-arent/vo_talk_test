@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class TestChat : MonoBehaviour
+public class Communication
 {
-    #region 必要なクラスの定義など
     [System.Serializable]
     public class MessageModel
     {
@@ -45,8 +46,6 @@ public class TestChat : MonoBehaviour
             public int total_tokens;
         }
     }
-    #endregion
-
     private MessageModel assistantModel = new()
     {
         role = "system",
@@ -55,22 +54,25 @@ public class TestChat : MonoBehaviour
     private readonly string apiKey = EnvFile.OPENAI_API_KEY;
     private List<MessageModel> communicationHistory = new();
 
-    async void Start()
+    public Communication()
     {
         communicationHistory.Add(assistantModel);
-        //MessageSubmit("はじめまして");
-
-
-        Communication c = new Communication();
-
-        await c.Submit("やっほー", (val) =>
+    }
+    private async void Test()
+    {
+        var request = new UnityWebRequest("", "POST")
         {
-            Debug.Log(val.content);
-        });
+            uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes("")),
+            downloadHandler = new DownloadHandlerBuffer()
+        }; var operation = request.SendWebRequest();
 
+        while (!request.isDone)
+        {
+            await Task.Yield();
+        }
     }
 
-    private void Communication(string newMessage, Action<MessageModel> result)
+    public async Task Submit(string newMessage, Action<MessageModel> result)
     {
         Debug.Log(newMessage);
         communicationHistory.Add(new MessageModel()
@@ -104,6 +106,11 @@ public class TestChat : MonoBehaviour
 
         var operation = request.SendWebRequest();
 
+        while (!request.isDone)
+        {
+            await Task.Yield();
+        }
+
         operation.completed += _ =>
         {
             if (operation.webRequest.result == UnityWebRequest.Result.ConnectionError ||
@@ -117,18 +124,11 @@ public class TestChat : MonoBehaviour
                 var responseString = operation.webRequest.downloadHandler.text;
                 var responseObject = JsonUtility.FromJson<ChatGPTRecieveModel>(responseString);
                 communicationHistory.Add(responseObject.choices[0].message);
-                Debug.Log(responseObject.choices[0].message.content);
+                //Debug.Log(responseObject.choices[0].message.content);
+                result.Invoke(responseObject.choices[0].message);
             }
             request.Dispose();
-
         };
     }
 
-    public void MessageSubmit(string sendMessage)
-    {
-        Communication(sendMessage, (result) =>
-        {
-            Debug.Log(result.content);
-        });
-    }
 }
