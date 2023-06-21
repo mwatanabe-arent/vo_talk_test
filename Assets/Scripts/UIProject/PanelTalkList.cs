@@ -106,8 +106,17 @@ public class PanelTalkList : UIPanel
         });
 
         clearButton.onClick.AddListener(ClearMessages);
+
+        ChatTest.OnResponse.AddListener(ChatTestAddMessage);
+
     }
 
+    public void ChatTestAddMessage(TalkModel model)
+    {
+        TalkBanner talkBanner = Instantiate(messageItemPrefab, contentRoot).GetComponent<TalkBanner>();
+        talkBanner.Setup(model);
+        talkHistory.talkList.Add(model);
+    }
     public void AddMessage(TalkModel model)
     {
         TalkBanner talkBanner = Instantiate(messageItemPrefab, contentRoot).GetComponent<TalkBanner>();

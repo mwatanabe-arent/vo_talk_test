@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ChatTest : MonoBehaviour
 {
     private Communication communication;
+    public static UnityEvent<TalkModel> OnResponse = new UnityEvent<TalkModel>();
+
     private void Start()
     {
         communication = new Communication();
@@ -27,10 +30,27 @@ public class ChatTest : MonoBehaviour
                     $"・{description}", (val) =>
                 {
                     Debug.Log(val.content);
+
+                    OnResponse?.Invoke(new TalkModel()
+                    {
+                        message = val.content,
+                        isRight = false
+                    });
+
                 });
             });
-
-
+        });
+        PanelTalkList.OnSendTalkMessage.AddListener((send_message) =>
+        {
+            communication.Submit($"{send_message}", (val) =>
+                {
+                    Debug.Log(val.content);
+                    OnResponse?.Invoke(new TalkModel()
+                    {
+                        message = val.content,
+                        isRight = false
+                    });
+                });
         });
     }
 
