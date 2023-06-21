@@ -61,13 +61,13 @@ public class TestChat : MonoBehaviour
         //MessageSubmit("はじめまして");
 
 
+        /*
         Communication c = new Communication();
-
         await c.Submit("やっほー", (val) =>
         {
             Debug.Log(val.content);
         });
-
+        */
     }
 
     private void Communication(string newMessage, Action<MessageModel> result)
