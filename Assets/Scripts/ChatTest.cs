@@ -7,6 +7,7 @@ public class ChatTest : MonoBehaviour
 {
     private Communication communication;
     public static UnityEvent<TalkModel> OnResponse = new UnityEvent<TalkModel>();
+    public static UnityEvent<TalkModel, BingSearchControl.NewsValue> OnResponseNews = new UnityEvent<TalkModel, BingSearchControl.NewsValue>();
 
     private void Start()
     {
@@ -21,21 +22,22 @@ public class ChatTest : MonoBehaviour
             {
                 int index = Random.Range(0, result.Count);
 
-                string description = result[index].description;
+                var news = result[index];
 
                 communication.Submit($"" +
                     $"あなたは私の良き友人です。" +
                     $"次のメッセージ内容は最近起こったニュースの内容です。" +
                     $"日常会話を開始するように話題を振ってください。" +
-                    $"・{description}", (val) =>
+                    $"・{news.description}", (val) =>
                 {
                     Debug.Log(val.content);
 
-                    OnResponse?.Invoke(new TalkModel()
+                    OnResponseNews?.Invoke(new TalkModel()
                     {
                         message = val.content,
                         isRight = false
-                    });
+                    },
+                    news);
 
                 });
             });

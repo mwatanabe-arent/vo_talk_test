@@ -25,6 +25,7 @@ public class PanelTalkList : UIPanel
     [SerializeField] private Button stampButton;
     [SerializeField] private Button submitButton;
     [SerializeField] private GameObject messageItemPrefab;
+    [SerializeField] private GameObject linkBannerPrefab;
     [SerializeField] private Transform contentRoot;
     [SerializeField] private Button clearButton;    // デバッグ用
 
@@ -108,19 +109,24 @@ public class PanelTalkList : UIPanel
         clearButton.onClick.AddListener(ClearMessages);
 
         ChatTest.OnResponse.AddListener(ChatTestAddMessage);
-
+        ChatTest.OnResponseNews.AddListener(ChatTestAddNews);
     }
 
-    public void ChatTestAddMessage(TalkModel model)
-    {
-        TalkBanner talkBanner = Instantiate(messageItemPrefab, contentRoot).GetComponent<TalkBanner>();
-        talkBanner.Setup(model);
-        talkHistory.talkList.Add(model);
-    }
     public void AddMessage(TalkModel model)
     {
         TalkBanner talkBanner = Instantiate(messageItemPrefab, contentRoot).GetComponent<TalkBanner>();
         talkBanner.Setup(model);
+    }
+    public void ChatTestAddMessage(TalkModel model)
+    {
+        AddMessage(model);
+        talkHistory.talkList.Add(model);
+    }
+    public void ChatTestAddNews(TalkModel model, BingSearchControl.NewsValue news)
+    {
+        ChatTestAddMessage(model);
+        LinkBanner linkBanner = Instantiate(linkBannerPrefab, contentRoot).GetComponent<LinkBanner>();
+        linkBanner.SetUrl(news.url);
     }
 
     private void ClearMessages()
