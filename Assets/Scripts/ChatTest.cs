@@ -23,7 +23,7 @@ public class ChatTest : MonoBehaviour
                 int index = Random.Range(0, result.Count);
 
                 var news = result[index];
-
+                Debug.Log(news.description);
                 communication.Submit($"" +
                     $"あなたは私の良き友人です。" +
                     $"次のメッセージ内容は最近起こったニュースの内容です。" +
