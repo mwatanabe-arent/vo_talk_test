@@ -53,10 +53,19 @@ public class Communication
     };
     private readonly string apiKey = EnvFile.OPENAI_API_KEY;
     private List<MessageModel> communicationHistory = new();
-
+    /*
     public Communication()
     {
         communicationHistory.Add(assistantModel);
+    }
+    */
+    public Communication(string systemContent)
+    {
+        communicationHistory.Add(new MessageModel()
+        {
+            role = "system",
+            content = systemContent
+        });
     }
     private async void Test()
     {
@@ -70,6 +79,10 @@ public class Communication
         {
             await Task.Yield();
         }
+    }
+    public void AddHistory(MessageModel history_model)
+    {
+        communicationHistory.Add(history_model);
     }
 
     public void Submit(string newMessage, Action<MessageModel> result)
@@ -119,6 +132,11 @@ public class Communication
                 var responseString = operation.webRequest.downloadHandler.text;
                 var responseObject = JsonUtility.FromJson<ChatGPTRecieveModel>(responseString);
                 communicationHistory.Add(responseObject.choices[0].message);
+                AddHistory(new MessageModel()
+                {
+                    role = "system",
+                    content = responseObject.choices[0].message.content
+                });
                 result.Invoke(responseObject.choices[0].message);
                 //Debug.Log(responseObject.choices[0].message.content);
             }
