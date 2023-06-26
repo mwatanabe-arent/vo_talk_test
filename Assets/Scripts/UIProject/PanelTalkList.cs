@@ -11,6 +11,7 @@ public class TalkModel
 {
     public string message;
     public bool isRight;
+    public string role;
 }
 
 [System.Serializable]
@@ -42,8 +43,11 @@ public class PanelTalkList : UIPanel
         {
             string saveString = JsonUtility.ToJson(talkHistory);
             Debug.Log(saveString);
-            PlayerPrefs.SetString(Define.KEY_SAVED_MESSAGE, saveString);
-            PlayerPrefs.Save();
+            if (0 < talkHistory.talkList.Count)
+            {
+                PlayerPrefs.SetString(Define.KEY_SAVED_MESSAGE, saveString);
+                PlayerPrefs.Save();
+            }
         }
     }
 
@@ -54,17 +58,14 @@ public class PanelTalkList : UIPanel
             var json = PlayerPrefs.GetString(Define.KEY_SAVED_MESSAGE);
             talkHistory = JsonUtility.FromJson<TalkHistory>(json);
             Debug.Log(talkHistory.talkList.Count);
+            foreach (TalkModel model in talkHistory.talkList)
+            {
+                AddMessage(model);
+            }
         }
         else
         {
             talkHistory = new TalkHistory();
-            talkHistory.talkList.Add(new TalkModel() { isRight = true, message = "メッセージ１" });
-            talkHistory.talkList.Add(new TalkModel() { isRight = false, message = "メッセージ2" });
-        }
-
-        foreach (TalkModel model in talkHistory.talkList)
-        {
-            AddMessage(model);
         }
 
         submitButton.interactable = false;
@@ -80,7 +81,8 @@ public class PanelTalkList : UIPanel
             TalkModel model = new TalkModel()
             {
                 message = inputMessage,
-                isRight = true
+                isRight = true,
+                role = "user",
             };
             talkBanner.Setup(model);
             talkHistory.talkList.Add(model);
@@ -100,7 +102,8 @@ public class PanelTalkList : UIPanel
             TalkModel model = new TalkModel()
             {
                 message = val.message,
-                isRight = false
+                isRight = false,
+                role = "system",
             };
             talkBanner.Setup(model);
             talkHistory.talkList.Add(model);

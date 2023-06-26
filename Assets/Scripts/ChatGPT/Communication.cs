@@ -54,18 +54,29 @@ public class Communication
     private readonly string apiKey = EnvFile.OPENAI_API_KEY;
     private List<MessageModel> communicationHistory = new();
     /*
-    public Communication()
-    {
-        communicationHistory.Add(assistantModel);
-    }
     */
+    public Communication(TalkHistory talkHistory)
+    {
+        foreach (var model in talkHistory.talkList)
+        {
+            MessageModel add = new MessageModel()
+            {
+                role = model.isRight ? "user" : "system",
+                content = model.message,
+            };
+            communicationHistory.Add(add);
+            Debug.Log($"role:{add.role} msg:{model.message}");
+        }
+    }
     public Communication(string systemContent)
     {
-        communicationHistory.Add(new MessageModel()
+        MessageModel initModel = new MessageModel()
         {
             role = "system",
             content = systemContent
-        });
+        };
+        communicationHistory.Add(initModel);
+        Debug.Log($"role:{initModel.role} msg:{initModel.content}");
     }
     private async void Test()
     {
