@@ -40,6 +40,8 @@ public class ChatTest : MonoBehaviour
 
         PanelTalkList.OnSendStampMessage.AddListener(() =>
         {
+            StartCoroutine(NewsTalk());
+            /*
             BingSearchControl bingSearchControl = new BingSearchControl();
 
             bingSearchControl.GetNews((result) =>
@@ -52,13 +54,13 @@ public class ChatTest : MonoBehaviour
                 {
                     submit_message += $"・Title:{data.name} Headline:{data.headline} Description:{data.description}";
                 }
+                Debug.Log(submit_message);
 
                 communication.AddHistory(new Communication.MessageModel()
                 {
                     role = "system",
                     content = submit_message
                 });
-                Debug.Log(submit_message);
 
                 //var news = result[index];
                 //Debug.Log(news.description);
@@ -77,6 +79,7 @@ public class ChatTest : MonoBehaviour
 
                 });
             });
+                */
         });
         PanelTalkList.OnSendTalkMessage.AddListener((send_message) =>
         {
@@ -91,6 +94,55 @@ public class ChatTest : MonoBehaviour
                     });
                 });
         });
+    }
+
+    private IEnumerator NewsTalk()
+    {
+        BingSearchControl bingSearchControl = new BingSearchControl();
+        yield return StartCoroutine(bingSearchControl.GetNews());
+
+        string submit_message = "また、次のニュースから、ルフィが取り上げそうな話題を選択して話しかけてください";
+
+        foreach (var data in bingSearchControl.newsValueList)
+        {
+            submit_message += $"・Title:{data.name} Headline:{data.headline} Description:{data.description}";
+        }
+        Debug.Log(submit_message);
+
+        communication.AddHistory(new Communication.MessageModel()
+        {
+            role = "system",
+            content = submit_message
+        });
+        Debug.Log("waitstart");
+        yield return new WaitForSeconds(1);
+        Debug.Log("waitend");
+
+        yield return StartCoroutine(communication.SubmitCoroutine($"先程のニュースをあなたから話したように会話を開始してください。あとできれば楽しい気持ちになるような話題を選んでください。"));
+        Debug.Log(communication.lastMessageModel.content);
+        OnResponseNews?.Invoke(new TalkModel()
+        {
+            message = communication.lastMessageModel.content,
+            isRight = false,
+            role = "system"
+        },
+        bingSearchControl.newsValueList[0]);
+        /*
+        communication.Submit(
+            $"先程のニュースをあなたから話したように会話を開始してください。あとできれば楽しい気持ちになるような話題を選んでください。", (val) =>
+            {
+                Debug.Log(val.content);
+
+                OnResponseNews?.Invoke(new TalkModel()
+                {
+                    message = val.content,
+                    isRight = false,
+                    role = "system"
+                },
+                bingSearchControl.newsValueList[0]);
+            });
+        */
+
     }
 
 }

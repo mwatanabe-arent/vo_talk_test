@@ -23,6 +23,42 @@ public class BingSearchControl
     {
         public List<NewsValue> value;
     }
+    public List<NewsValue> newsValueList;
+
+    public IEnumerator GetNews()
+    {
+        newsValueList = null;
+        var headers = new Dictionary<string, string>
+            {
+                {"Ocp-Apim-Subscription-Key", "c76e37c678bb4c05b92a324a26103df4"},
+                {"Content-type", "application/json"},
+                {"X-Slack-No-Retry", "1"}
+            };
+        var apiUrl = "https://api.bing.microsoft.com/v7.0/news/search";
+        var request = new UnityWebRequest(apiUrl, "Get")
+        {
+            //uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonOptions)),
+            downloadHandler = new DownloadHandlerBuffer()
+        };
+        foreach (var header in headers)
+        {
+            request.SetRequestHeader(header.Key, header.Value);
+        }
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError ||
+           request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            Debug.LogError(request.error);
+            yield break;
+        }
+        var responseString = request.downloadHandler.text;
+        var temp = JsonUtility.FromJson<NewsRoot>(request.downloadHandler.text);
+        request.Dispose();
+
+        newsValueList = temp.value;
+    }
 
     public void GetNews(Action<List<NewsValue>> result)
     {
@@ -50,6 +86,7 @@ public class BingSearchControl
             if (operation.webRequest.result == UnityWebRequest.Result.ConnectionError ||
                        operation.webRequest.result == UnityWebRequest.Result.ProtocolError)
             {
+                request.Dispose();
                 result.Invoke(null);
                 Debug.LogError(operation.webRequest.error);
                 throw new Exception();
@@ -58,9 +95,9 @@ public class BingSearchControl
             {
                 var responseString = operation.webRequest.downloadHandler.text;
                 var temp = JsonUtility.FromJson<NewsRoot>(request.downloadHandler.text);
+                request.Dispose();
                 result.Invoke(temp.value);
             }
-            request.Dispose();
         };
 
         /*

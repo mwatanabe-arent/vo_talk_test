@@ -155,6 +155,65 @@ public class Communication
 
         };
     }
+    public MessageModel lastMessageModel;
+    public IEnumerator SubmitCoroutine(string newMessage)
+    {
+        lastMessageModel = null;
+        Debug.Log(newMessage);
+        communicationHistory.Add(new MessageModel()
+        {
+            role = "user",
+            content = newMessage
+        });
+
+        var apiUrl = "https://api.openai.com/v1/chat/completions";
+        var jsonOptions = JsonUtility.ToJson(
+            new CompletionRequestModel()
+            {
+                model = "gpt-3.5-turbo",
+                messages = communicationHistory
+            }, true);
+        var headers = new Dictionary<string, string>
+            {
+                {"Authorization", "Bearer " + apiKey},
+                {"Content-type", "application/json"},
+                {"X-Slack-No-Retry", "1"}
+            };
+        var request = new UnityWebRequest(apiUrl, "POST")
+        {
+            uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonOptions)),
+            downloadHandler = new DownloadHandlerBuffer()
+        };
+        foreach (var header in headers)
+        {
+            request.SetRequestHeader(header.Key, header.Value);
+        }
+
+        yield return request.SendWebRequest();
+
+
+        if (request.result == UnityWebRequest.Result.ConnectionError ||
+           request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            Debug.LogError(request.error);
+            yield break;
+        }
+        else
+        {
+            var responseString = request.downloadHandler.text;
+            var responseObject = JsonUtility.FromJson<ChatGPTRecieveModel>(responseString);
+            communicationHistory.Add(responseObject.choices[0].message);
+            AddHistory(new MessageModel()
+            {
+                role = "system",
+                content = responseObject.choices[0].message.content
+            });
+            lastMessageModel = responseObject.choices[0].message;
+            //result.Invoke(responseObject.choices[0].message);
+            //Debug.Log(responseObject.choices[0].message.content);
+        }
+        request.Dispose();
+    }
 
     public async Task SubmitAsync(string newMessage, Action<MessageModel> result)
     {
