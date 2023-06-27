@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+public struct Questions
+{
+    public string[] question;
+}
+
 public class ChatTest : MonoBehaviour
 {
     private Communication communication;
@@ -119,6 +124,7 @@ public class ChatTest : MonoBehaviour
         Debug.Log("waitend");
 
         yield return StartCoroutine(communication.SubmitCoroutine($"先程のニュースをあなたから話したように会話を開始してください。あとできれば楽しい気持ちになるような話題を選んでください。"));
+        yield return new WaitForSeconds(1);
         Debug.Log(communication.lastMessageModel.content);
         OnResponseNews?.Invoke(new TalkModel()
         {
@@ -127,6 +133,27 @@ public class ChatTest : MonoBehaviour
             role = "system"
         },
         bingSearchControl.newsValueList[0]);
+
+        string json_format = "{\"question\":[,,]}";
+
+        yield return StartCoroutine(communication.SimpleCommunication(
+            $"次の発言は先程あなたが行ったものです。" +
+            $"「{communication.lastMessageModel.content}」" +
+            $"この中から質問文を以下のルールに従って生成してください。" +
+            $"- 質問文は3つ作成" +
+            $"- 質問文は15文字前後" +
+            $"- 固有名詞や人物名を中心質問をしてください" +
+            $"- データ形式は次のフォーマットに従ってください" +
+            $"{json_format}" +
+            $"また、返答はjsonデータのみ返答してください。"));
+
+        Debug.Log(communication.simpleCommunicationResponse.content);
+
+        Questions questions = JsonUtility.FromJson<Questions>(communication.simpleCommunicationResponse.content);
+        foreach (var q in questions.question)
+        {
+            Debug.Log(q);
+        }
         /*
         communication.Submit(
             $"先程のニュースをあなたから話したように会話を開始してください。あとできれば楽しい気持ちになるような話題を選んでください。", (val) =>

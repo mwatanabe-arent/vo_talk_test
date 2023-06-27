@@ -215,6 +215,62 @@ public class Communication
         request.Dispose();
     }
 
+    public MessageModel simpleCommunicationResponse;
+    public IEnumerator SimpleCommunication(string newMessage)
+    {
+        simpleCommunicationResponse = null;
+        var instantHistory = new List<MessageModel>();
+        instantHistory.Add(new MessageModel()
+        {
+            role = "user",
+            content = newMessage
+        });
+        var apiUrl = "https://api.openai.com/v1/chat/completions";
+        var jsonOptions = JsonUtility.ToJson(
+            new CompletionRequestModel()
+            {
+                model = "gpt-3.5-turbo",
+                messages = instantHistory
+            }, true);
+        var headers = new Dictionary<string, string>
+            {
+                {"Authorization", "Bearer " + apiKey},
+                {"Content-type", "application/json"},
+                {"X-Slack-No-Retry", "1"}
+            };
+        var request = new UnityWebRequest(apiUrl, "POST")
+        {
+            uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonOptions)),
+            downloadHandler = new DownloadHandlerBuffer()
+        };
+        foreach (var header in headers)
+        {
+            request.SetRequestHeader(header.Key, header.Value);
+        }
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError ||
+           request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            Debug.LogError(request.error);
+            yield break;
+        }
+        else
+        {
+            var responseString = request.downloadHandler.text;
+            var responseObject = JsonUtility.FromJson<ChatGPTRecieveModel>(responseString);
+            communicationHistory.Add(responseObject.choices[0].message);
+            AddHistory(new MessageModel()
+            {
+                role = "system",
+                content = responseObject.choices[0].message.content
+            });
+            simpleCommunicationResponse = responseObject.choices[0].message;
+        }
+        request.Dispose();
+    }
+
     public async Task SubmitAsync(string newMessage, Action<MessageModel> result)
     {
         Debug.Log(newMessage);
