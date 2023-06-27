@@ -173,6 +173,7 @@ public class Communication
                 model = "gpt-3.5-turbo",
                 messages = communicationHistory
             }, true);
+        Debug.Log(jsonOptions);
         var headers = new Dictionary<string, string>
             {
                 {"Authorization", "Bearer " + apiKey},
@@ -213,6 +214,8 @@ public class Communication
             //Debug.Log(responseObject.choices[0].message.content);
         }
         request.Dispose();
+
+        yield return 0;
     }
 
     public MessageModel simpleCommunicationResponse;

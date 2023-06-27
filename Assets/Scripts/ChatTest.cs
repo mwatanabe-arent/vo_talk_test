@@ -3,17 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public struct Questions
-{
-    public string[] question;
-}
 
 public class ChatTest : MonoBehaviour
 {
     private Communication communication;
     public static UnityEvent<TalkModel> OnResponse = new UnityEvent<TalkModel>();
     public static UnityEvent<TalkModel, BingSearchControl.NewsValue> OnResponseNews = new UnityEvent<TalkModel, BingSearchControl.NewsValue>();
-
+    public static UnityEvent<Questions> OnQuestionRequest = new UnityEvent<Questions>();
     private void Start()
     {
         if (PlayerPrefs.HasKey(Define.KEY_SAVED_MESSAGE))
@@ -86,18 +82,40 @@ public class ChatTest : MonoBehaviour
             });
                 */
         });
-        PanelTalkList.OnSendTalkMessage.AddListener((send_message) =>
+        PanelTalkList.OnSendTalkMessage.AddListener(SimpleTalk);
+        QuestionButton.OnQuestionButton.AddListener(SimpleTalk);
+    }
+
+    private void SimpleTalk(string message)
+    {
+        /*
+        communication.Submit($"{message}", (val) =>
         {
-            communication.Submit($"{send_message}", (val) =>
-                {
-                    Debug.Log(val.content);
-                    OnResponse?.Invoke(new TalkModel()
-                    {
-                        message = val.content,
-                        isRight = false,
-                        role = "system",
-                    });
-                });
+            Debug.Log(val.content);
+            OnResponse?.Invoke(new TalkModel()
+            {
+                message = val.content,
+                isRight = false,
+                role = "system",
+            });
+        });
+        */
+        StartCoroutine(SimpleTalkCoroutine(message));
+    }
+
+    private IEnumerator SimpleTalkCoroutine(string message)
+    {
+
+        yield return StartCoroutine(communication.
+            SubmitCoroutine(
+            $"{message}"));
+
+        yield return 0;
+        OnResponse?.Invoke(new TalkModel()
+        {
+            message = communication.lastMessageModel.content,
+            isRight = false,
+            role = "system",
         });
     }
 
@@ -150,10 +168,13 @@ public class ChatTest : MonoBehaviour
         Debug.Log(communication.simpleCommunicationResponse.content);
 
         Questions questions = JsonUtility.FromJson<Questions>(communication.simpleCommunicationResponse.content);
+
         foreach (var q in questions.question)
         {
             Debug.Log(q);
         }
+        OnQuestionRequest?.Invoke(questions);
+
         /*
         communication.Submit(
             $"先程のニュースをあなたから話したように会話を開始してください。あとできれば楽しい気持ちになるような話題を選んでください。", (val) =>

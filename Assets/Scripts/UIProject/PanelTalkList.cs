@@ -29,6 +29,7 @@ public class PanelTalkList : UIPanel
     [SerializeField] private GameObject linkBannerPrefab;
     [SerializeField] private Transform contentRoot;
     [SerializeField] private Button clearButton;    // デバッグ用
+    [SerializeField] private GameObject questionListPrefab;
 
     private TalkHistory talkHistory;// = new TalkHistory();
 
@@ -108,11 +109,15 @@ public class PanelTalkList : UIPanel
             talkBanner.Setup(model);
             talkHistory.talkList.Add(model);
         });
-
         clearButton.onClick.AddListener(ClearMessages);
+
+        // デバッグ的な処理。とりあえず毎回クリア
+        ClearMessages();
 
         ChatTest.OnResponse.AddListener(ChatTestAddMessage);
         ChatTest.OnResponseNews.AddListener(ChatTestAddNews);
+
+        ChatTest.OnQuestionRequest.AddListener(AddQuestionButtons);
     }
 
     public void AddMessage(TalkModel model)
@@ -156,5 +161,11 @@ public class PanelTalkList : UIPanel
         talkHistory = new TalkHistory();
     }
 
+    private void AddQuestionButtons(Questions arg0)
+    {
+        QuestionList questionList = Instantiate(questionListPrefab, contentRoot).GetComponent<QuestionList>();
+
+        questionList.Setup(arg0);
+    }
 
 }
