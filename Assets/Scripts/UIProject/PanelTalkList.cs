@@ -30,6 +30,7 @@ public class PanelTalkList : UIPanel
     [SerializeField] private Transform contentRoot;
     [SerializeField] private Button clearButton;    // デバッグ用
     [SerializeField] private GameObject questionListPrefab;
+    [SerializeField] private GameObject responseWait;
 
     private TalkHistory talkHistory;// = new TalkHistory();
 
@@ -38,6 +39,9 @@ public class PanelTalkList : UIPanel
     public static UnityEvent<string> OnSendTalkMessage = new UnityEvent<string>();
     public static UnityEvent OnSendStampMessage = new UnityEvent();
     public static UnityEvent OnClearButton = new UnityEvent();
+
+    public static UnityEvent OnStartChatGPT = new UnityEvent();
+    public static UnityEvent OnEndChatGPT = new UnityEvent();
 
     private void OnDestroy()
     {
@@ -123,6 +127,17 @@ public class PanelTalkList : UIPanel
         ChatTest.OnResponseNews.AddListener(ChatTestAddNews);
 
         ChatTest.OnQuestionRequest.AddListener(AddQuestionButtons);
+
+        responseWait.SetActive(false);
+
+        OnStartChatGPT?.AddListener(() =>
+        {
+            responseWait.SetActive(true);
+        });
+        OnEndChatGPT?.AddListener(() =>
+        {
+            responseWait.SetActive(false);
+        });
     }
 
     public void AddMessage(TalkModel model)

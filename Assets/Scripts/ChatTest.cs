@@ -56,20 +56,26 @@ public class ChatTest : MonoBehaviour
 
         PanelTalkList.OnSendStampMessage.AddListener(() =>
         {
-            StartCoroutine(NewsTalk());
-            /*
+            //StartCoroutine(NewsTalk());
+            PanelTalkList.OnStartChatGPT.Invoke();
+
             BingSearchControl bingSearchControl = new BingSearchControl();
 
             bingSearchControl.GetNews((result) =>
             {
                 int index = Random.Range(0, result.Count);
 
-                string submit_message = "また、次のニュースから、ルフィが取り上げそうな話題を選択して話しかけてください";
+                //string submit_message = "また、次のニュースから、ルフィが取り上げそうな話題を選択して話しかけてください";
+                string submit_message = $"また、次のニュースから、{characterProfile.characterName}が取り上げそうな話題を選択して話しかけてください";
 
+                /*
                 foreach (var data in result)
                 {
                     submit_message += $"・Title:{data.name} Headline:{data.headline} Description:{data.description}";
                 }
+                */
+                var data = result[index];
+                submit_message += $"・Title:{data.name} Headline:{data.headline} Description:{data.description}";
                 Debug.Log(submit_message);
 
                 communication.AddHistory(new Communication.MessageModel()
@@ -93,9 +99,38 @@ public class ChatTest : MonoBehaviour
                     },
                     result[0]);
 
+                    string json_format = "{\"question\":[question1,question2,question3]}";
+                    communication.Submit(
+                        $"次の発言は先程あなたが行ったものです。" +
+                        $"「{val.content}」" +
+                        $"この中から質問文を以下のルールに従って生成してください。" +
+                        $"- 質問文は3つ作成" +
+                        $"- 質問文は15文字前後" +
+                        $"- 固有名詞や人物名を中心質問をしてください" +
+                        $"- データ形式は次のフォーマットに従ってください" +
+                        $"- jsonのフォーマットはquestionの配列にしてください" +
+                        $"- jsonデータは一つだけにしてください" +
+                        $"{json_format}" +
+                        $"また、返答はjsonデータのみ返答してください。", (questionModel) =>
+                         {
+                             Questions questions = JsonUtility.FromJson<Questions>(questionModel.content);
+                             OnQuestionRequest?.Invoke(questions);
+                             PanelTalkList.OnEndChatGPT.Invoke();
+                         });
+
+                    /*
+                    Debug.Log(communication.simpleCommunicationResponse.content);
+
+                    Questions questions = JsonUtility.FromJson<Questions>(communication.simpleCommunicationResponse.content);
+
+                    foreach (var q in questions.question)
+                    {
+                        Debug.Log(q);
+                    }
+                    OnQuestionRequest?.Invoke(questions);
+                    */
                 });
             });
-                */
         });
         PanelTalkList.OnSendTalkMessage.AddListener(SimpleTalk);
         QuestionButton.OnQuestionButton.AddListener(SimpleTalk);
@@ -103,7 +138,7 @@ public class ChatTest : MonoBehaviour
 
     private void SimpleTalk(string message)
     {
-        /*
+        PanelTalkList.OnStartChatGPT.Invoke();
         communication.Submit($"{message}", (val) =>
         {
             Debug.Log(val.content);
@@ -113,11 +148,12 @@ public class ChatTest : MonoBehaviour
                 isRight = false,
                 role = "system",
             });
-        });
-        */
-        StartCoroutine(SimpleTalkCoroutine(message));
-    }
+            PanelTalkList.OnEndChatGPT.Invoke();
 
+        });
+        //StartCoroutine(SimpleTalkCoroutine(message));
+    }
+    /*
     private IEnumerator SimpleTalkCoroutine(string message)
     {
 
@@ -133,6 +169,7 @@ public class ChatTest : MonoBehaviour
             role = "system",
         });
     }
+    */
 
     private IEnumerator NewsTalk()
     {
