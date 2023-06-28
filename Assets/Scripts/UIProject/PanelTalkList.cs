@@ -37,6 +37,7 @@ public class PanelTalkList : UIPanel
 
     public static UnityEvent<string> OnSendTalkMessage = new UnityEvent<string>();
     public static UnityEvent OnSendStampMessage = new UnityEvent();
+    public static UnityEvent OnClearButton = new UnityEvent();
 
     private void OnDestroy()
     {
@@ -109,7 +110,11 @@ public class PanelTalkList : UIPanel
             talkBanner.Setup(model);
             talkHistory.talkList.Add(model);
         });
-        clearButton.onClick.AddListener(ClearMessages);
+        clearButton.onClick.AddListener(() =>
+        {
+            ClearMessages();
+            OnClearButton?.Invoke();
+        });
 
         // デバッグ的な処理。とりあえず毎回クリア
         ClearMessages();

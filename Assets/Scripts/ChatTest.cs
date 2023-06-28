@@ -10,8 +10,17 @@ public class ChatTest : MonoBehaviour
     public static UnityEvent<TalkModel> OnResponse = new UnityEvent<TalkModel>();
     public static UnityEvent<TalkModel, BingSearchControl.NewsValue> OnResponseNews = new UnityEvent<TalkModel, BingSearchControl.NewsValue>();
     public static UnityEvent<Questions> OnQuestionRequest = new UnityEvent<Questions>();
+
+    [SerializeField] private CharacterProfile characterProfile;
+
     private void Start()
     {
+        CharacterChangeButton.OnChangeProfile.AddListener((chara) =>
+        {
+            characterProfile = chara;
+            PanelTalkList.OnClearButton.Invoke();
+        });
+
         if (PlayerPrefs.HasKey(Define.KEY_SAVED_MESSAGE))
         {
             var json = PlayerPrefs.GetString(Define.KEY_SAVED_MESSAGE);
@@ -36,8 +45,14 @@ public class ChatTest : MonoBehaviour
             var submit_message = $"" +
                 $"あなたはマンガ、ワンピースに出てくる登場キャラのモンキー・D・ルフィとしてロールプレイをしてください。" +
                 $"次のプロフィールに基づいて話すようにしてください" + prompt;
-            communication = new Communication(submit_message);
+            //communication = new Communication(submit_message);
+            communication = new Communication(characterProfile.characterPrompt);
         }
+
+        PanelTalkList.OnClearButton.AddListener(() =>
+        {
+            communication = new Communication(characterProfile.characterPrompt);
+        });
 
         PanelTalkList.OnSendStampMessage.AddListener(() =>
         {
@@ -124,12 +139,17 @@ public class ChatTest : MonoBehaviour
         BingSearchControl bingSearchControl = new BingSearchControl();
         yield return StartCoroutine(bingSearchControl.GetNews());
 
-        string submit_message = "また、次のニュースから、ルフィが取り上げそうな話題を選択して話しかけてください";
+        string submit_message = $"また、次のニュースから、{characterProfile.characterName}が取り上げそうな話題を選択して話しかけてください";
 
+        /*
         foreach (var data in bingSearchControl.newsValueList)
         {
             submit_message += $"・Title:{data.name} Headline:{data.headline} Description:{data.description}";
-        }
+        }*/
+
+        int index = Random.Range(0, bingSearchControl.newsValueList.Count);
+        var data = bingSearchControl.newsValueList[index];
+        submit_message += $"・Title:{data.name} Headline:{data.headline} Description:{data.description}";
         Debug.Log(submit_message);
 
         communication.AddHistory(new Communication.MessageModel()
@@ -137,9 +157,7 @@ public class ChatTest : MonoBehaviour
             role = "system",
             content = submit_message
         });
-        Debug.Log("waitstart");
         yield return new WaitForSeconds(1);
-        Debug.Log("waitend");
 
         yield return StartCoroutine(communication.SubmitCoroutine($"先程のニュースをあなたから話したように会話を開始してください。あとできれば楽しい気持ちになるような話題を選んでください。"));
         yield return new WaitForSeconds(1);
@@ -152,7 +170,7 @@ public class ChatTest : MonoBehaviour
         },
         bingSearchControl.newsValueList[0]);
 
-        string json_format = "{\"question\":[,,]}";
+        string json_format = "{\"question\":[question1,question2,question3]}";
 
         yield return StartCoroutine(communication.SimpleCommunication(
             $"次の発言は先程あなたが行ったものです。" +
@@ -162,6 +180,8 @@ public class ChatTest : MonoBehaviour
             $"- 質問文は15文字前後" +
             $"- 固有名詞や人物名を中心質問をしてください" +
             $"- データ形式は次のフォーマットに従ってください" +
+            $"- jsonのフォーマットはquestionの配列にしてください" +
+            $"- jsonデータは一つだけにしてください" +
             $"{json_format}" +
             $"また、返答はjsonデータのみ返答してください。"));
 
