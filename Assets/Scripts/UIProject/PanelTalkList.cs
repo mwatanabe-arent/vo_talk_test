@@ -31,6 +31,7 @@ public class PanelTalkList : UIPanel
     [SerializeField] private Button clearButton;    // デバッグ用
     [SerializeField] private GameObject questionListPrefab;
     [SerializeField] private GameObject responseWait;
+    [SerializeField] private Button youtubeButton;
 
     private TalkHistory talkHistory;// = new TalkHistory();
 
@@ -96,10 +97,26 @@ public class PanelTalkList : UIPanel
             OnSendTalkMessage?.Invoke(inputMessage);
         });
 
+        // 一旦閉鎖
+        stampButton.interactable = false;
         stampButton.onClick.AddListener(() =>
         {
             OnSendStampMessage?.Invoke();
         });
+        youtubeButton.onClick.AddListener(() =>
+        {
+            OnSendStampMessage?.Invoke();
+        });
+
+        ChatControl.OnResponse.RemoveAllListeners();
+        ChatControl.OnResponse.AddListener((val) =>
+        {
+            TalkBanner talkBanner = Instantiate(messageItemPrefab, contentRoot).GetComponent<TalkBanner>();
+            talkBanner.Setup(val);
+            talkHistory.talkList.Add(val);
+        });
+        ChatControl.OnQuestionRequest.AddListener(AddQuestionButtons);
+
 
         LoginTest.OnResponse.RemoveAllListeners();
         LoginTest.OnResponse.AddListener((val) =>
