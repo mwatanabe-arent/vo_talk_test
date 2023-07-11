@@ -32,6 +32,7 @@ public class PanelTalkList : UIPanel
     [SerializeField] private GameObject questionListPrefab;
     [SerializeField] private GameObject responseWait;
     [SerializeField] private Button youtubeButton;
+    [SerializeField] private Button hatebuButton;
 
     private TalkHistory talkHistory;// = new TalkHistory();
 
@@ -39,6 +40,8 @@ public class PanelTalkList : UIPanel
 
     public static UnityEvent<string> OnSendTalkMessage = new UnityEvent<string>();
     public static UnityEvent OnSendStampMessage = new UnityEvent();
+    public static UnityEvent OnSendSelectButton = new UnityEvent();
+
     public static UnityEvent OnClearButton = new UnityEvent();
 
     public static UnityEvent OnStartChatGPT = new UnityEvent();
@@ -107,6 +110,10 @@ public class PanelTalkList : UIPanel
         {
             OnSendStampMessage?.Invoke();
         });
+        hatebuButton.onClick.AddListener(() =>
+        {
+            OnSendSelectButton?.Invoke();
+        });
 
         ChatControl.OnResponse.RemoveAllListeners();
         ChatControl.OnResponse.AddListener((val) =>
@@ -116,6 +123,7 @@ public class PanelTalkList : UIPanel
             talkHistory.talkList.Add(val);
         });
         ChatControl.OnQuestionRequest.AddListener(AddQuestionButtons);
+        ChatControl.OnSelectRequest.AddListener(AddSelectButtons);
 
 
         LoginTest.OnResponse.RemoveAllListeners();
@@ -203,6 +211,11 @@ public class PanelTalkList : UIPanel
         QuestionList questionList = Instantiate(questionListPrefab, contentRoot).GetComponent<QuestionList>();
 
         questionList.Setup(arg0);
+    }
+
+    private void AddSelectButtons(List<SelectButtonItem> list){
+        QuestionList questionList = Instantiate(questionListPrefab, contentRoot).GetComponent<QuestionList>();
+        questionList.Setup(list);
     }
 
 }

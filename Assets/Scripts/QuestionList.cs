@@ -18,6 +18,17 @@ public class QuestionList : MonoBehaviour
             button.SetQuestion(q);
             button.gameObject.SetActive(true);
         }
+    }
+
+    public void Setup(List<SelectButtonItem> list){
+        foreach (var q in list)
+        {
+            QuestionButton button = Instantiate(questionButtonPrefab, transform).GetComponent<QuestionButton>();
+            button.SetSelectButtonItem(q);
+            button.gameObject.SetActive(true);
+        }
 
     }
+
+
 }
