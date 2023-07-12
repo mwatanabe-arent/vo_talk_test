@@ -8,6 +8,9 @@ using TMPro;
 public class QuestionButton : MonoBehaviour
 {
     public static UnityEvent<string> OnQuestionButton = new UnityEvent<string>();
+    public static UnityEvent<SelectButtonItem> OnSelectButton = new UnityEvent<SelectButtonItem>();
+
+    public SelectButtonItem selectButtonItem;
 
     private string questionMessage;
 
@@ -17,11 +20,21 @@ public class QuestionButton : MonoBehaviour
         transform.GetComponentInChildren<TextMeshProUGUI>().text = message;
     }
 
+    public void SetSelectButtonItem(SelectButtonItem item){
+        selectButtonItem = item;
+        transform.GetComponentInChildren<TextMeshProUGUI>().text = selectButtonItem.title;
+    }
+
     private void Awake()
     {
         GetComponent<Button>().onClick.AddListener(() =>
         {
-            OnQuestionButton?.Invoke(questionMessage);
+            if(selectButtonItem != null){
+                OnSelectButton?.Invoke(selectButtonItem);
+            }
+            else{
+                OnQuestionButton?.Invoke(questionMessage);
+            }
         });
     }
 

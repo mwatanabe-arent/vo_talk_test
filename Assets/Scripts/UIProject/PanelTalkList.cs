@@ -31,6 +31,8 @@ public class PanelTalkList : UIPanel
     [SerializeField] private Button clearButton;    // デバッグ用
     [SerializeField] private GameObject questionListPrefab;
     [SerializeField] private GameObject responseWait;
+    [SerializeField] private Button youtubeButton;
+    [SerializeField] private Button hatebuButton;
 
     private TalkHistory talkHistory;// = new TalkHistory();
 
@@ -38,6 +40,8 @@ public class PanelTalkList : UIPanel
 
     public static UnityEvent<string> OnSendTalkMessage = new UnityEvent<string>();
     public static UnityEvent OnSendStampMessage = new UnityEvent();
+    public static UnityEvent OnSendSelectButton = new UnityEvent();
+
     public static UnityEvent OnClearButton = new UnityEvent();
 
     public static UnityEvent OnStartChatGPT = new UnityEvent();
@@ -96,10 +100,31 @@ public class PanelTalkList : UIPanel
             OnSendTalkMessage?.Invoke(inputMessage);
         });
 
+        // 一旦閉鎖
+        stampButton.interactable = false;
         stampButton.onClick.AddListener(() =>
         {
             OnSendStampMessage?.Invoke();
         });
+        youtubeButton.onClick.AddListener(() =>
+        {
+            OnSendStampMessage?.Invoke();
+        });
+        hatebuButton.onClick.AddListener(() =>
+        {
+            OnSendSelectButton?.Invoke();
+        });
+
+        ChatControl.OnResponse.RemoveAllListeners();
+        ChatControl.OnResponse.AddListener((val) =>
+        {
+            TalkBanner talkBanner = Instantiate(messageItemPrefab, contentRoot).GetComponent<TalkBanner>();
+            talkBanner.Setup(val);
+            talkHistory.talkList.Add(val);
+        });
+        ChatControl.OnQuestionRequest.AddListener(AddQuestionButtons);
+        ChatControl.OnSelectRequest.AddListener(AddSelectButtons);
+
 
         LoginTest.OnResponse.RemoveAllListeners();
         LoginTest.OnResponse.AddListener((val) =>
@@ -186,6 +211,11 @@ public class PanelTalkList : UIPanel
         QuestionList questionList = Instantiate(questionListPrefab, contentRoot).GetComponent<QuestionList>();
 
         questionList.Setup(arg0);
+    }
+
+    private void AddSelectButtons(List<SelectButtonItem> list){
+        QuestionList questionList = Instantiate(questionListPrefab, contentRoot).GetComponent<QuestionList>();
+        questionList.Setup(list);
     }
 
 }
