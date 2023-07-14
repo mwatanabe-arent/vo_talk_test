@@ -15,6 +15,7 @@ public class TalkBanner : MonoBehaviour
 
     private void Setup(string message, bool isRight)
     {
+        //Debug.Log("Setup:" + message);
         messageText.text = message;
         this.isRight = isRight;
 

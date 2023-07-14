@@ -86,7 +86,7 @@ public class PanelTalkList : UIPanel
         });
         submitButton.onClick.AddListener(() =>
         {
-            TalkBanner talkBanner = Instantiate(messageItemPrefab, contentRoot).GetComponent<TalkBanner>();
+            //TalkBanner talkBanner = Instantiate(messageItemPrefab, contentRoot).GetComponent<TalkBanner>();
 
             TalkModel model = new TalkModel()
             {
@@ -94,8 +94,8 @@ public class PanelTalkList : UIPanel
                 isRight = true,
                 role = "user",
             };
-            talkBanner.Setup(model);
-            talkHistory.talkList.Add(model);
+            //talkBanner.Setup(model);
+            //talkHistory.talkList.Add(model);
             inputField.text = "";
             OnSendTalkMessage?.Invoke(inputMessage);
         });
@@ -213,7 +213,8 @@ public class PanelTalkList : UIPanel
         questionList.Setup(arg0);
     }
 
-    private void AddSelectButtons(List<SelectButtonItem> list){
+    private void AddSelectButtons(List<SelectButtonItem> list)
+    {
         QuestionList questionList = Instantiate(questionListPrefab, contentRoot).GetComponent<QuestionList>();
         questionList.Setup(list);
     }
