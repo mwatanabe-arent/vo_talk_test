@@ -20,7 +20,9 @@ public class QuestionButton : MonoBehaviour
         transform.GetComponentInChildren<TextMeshProUGUI>().text = message;
     }
 
-    public void SetSelectButtonItem(SelectButtonItem item){
+    public void SetSelectButtonItem(SelectButtonItem item)
+    {
+        Debug.Log("SetSelectButtonItem");
         selectButtonItem = item;
         transform.GetComponentInChildren<TextMeshProUGUI>().text = selectButtonItem.title;
     }
@@ -29,10 +31,14 @@ public class QuestionButton : MonoBehaviour
     {
         GetComponent<Button>().onClick.AddListener(() =>
         {
-            if(selectButtonItem != null){
+            selectButtonItem = null;
+            Debug.Log(selectButtonItem);
+            if (selectButtonItem != null)
+            {
                 OnSelectButton?.Invoke(selectButtonItem);
             }
-            else{
+            else
+            {
                 OnQuestionButton?.Invoke(questionMessage);
             }
         });

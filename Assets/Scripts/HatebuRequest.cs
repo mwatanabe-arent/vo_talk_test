@@ -6,7 +6,8 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 [System.Serializable]
-public class SelectButtonItem{
+public class SelectButtonItem
+{
     public string title;
     public string link;
     public string category;
@@ -31,7 +32,16 @@ public class HatebuRequest : MonoBehaviour
     }
     */
 
-    public IEnumerator GetHatebuItems(Action<List<SelectButtonItem>> callback){
+    public IEnumerator GetHatebuTalk(Action<string> callback)
+    {
+        UnityWebRequest request = UnityWebRequest.Get(Define.ENDPOINT + "api/hatebu/character");
+        yield return request.SendWebRequest();
+        Debug.Log(request.downloadHandler.text);
+        callback.Invoke(request.downloadHandler.text);
+    }
+
+    public IEnumerator GetHatebuItems(Action<List<SelectButtonItem>> callback)
+    {
         UnityWebRequest request = UnityWebRequest.Get(Define.ENDPOINT + "api/hatebu");
         yield return request.SendWebRequest();
         Debug.Log(request.downloadHandler.text);

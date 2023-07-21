@@ -12,6 +12,7 @@ public class QuestionList : MonoBehaviour
     public GameObject questionButtonPrefab;
     public void Setup(Questions questions)
     {
+        Debug.Log("question");
         foreach (var q in questions.question)
         {
             QuestionButton button = Instantiate(questionButtonPrefab, transform).GetComponent<QuestionButton>();
@@ -20,7 +21,10 @@ public class QuestionList : MonoBehaviour
         }
     }
 
-    public void Setup(List<SelectButtonItem> list){
+    public void Setup(List<SelectButtonItem> list)
+    {
+        Debug.Log("select");
+
         foreach (var q in list)
         {
             QuestionButton button = Instantiate(questionButtonPrefab, transform).GetComponent<QuestionButton>();

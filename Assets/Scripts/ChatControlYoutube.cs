@@ -12,7 +12,8 @@ public string[] questions;
 
 
 [System.Serializable]
-public class QuestionMessage{
+public class QuestionMessage
+{
     public string message;
     //public Question question;
     public string question_json;
@@ -30,7 +31,8 @@ public class ChatControlYoutube : ChatControl
         //StartCoroutine(WebRequestTest());
     }
 
-    private IEnumerator WebRequestTest(){
+    private IEnumerator WebRequestTest()
+    {
         //UnityWebRequest request = UnityWebRequest.Get(Define.ENDPOINT + "api/youtube");
         UnityWebRequest request = UnityWebRequest.Get(Define.ENDPOINT + "api/chat/?message=ここに質問を入れてください");
         yield return request.SendWebRequest();
@@ -46,7 +48,8 @@ public class ChatControlYoutube : ChatControl
         });
         //Debug.Log(questionMessage.question);
         var questions = JsonUtility.FromJson<Questions>(questionMessage.question_json);
-        foreach(var question in questions.question){
+        foreach (var question in questions.question)
+        {
             Debug.Log(question);
         }
         OnQuestionRequest?.Invoke(questions);
@@ -83,7 +86,8 @@ public class ChatControlYoutube : ChatControl
         });
 
         var questions = JsonUtility.FromJson<Questions>(questionMessage.question_json);
-        foreach(var question in questions.question){
+        foreach (var question in questions.question)
+        {
             Debug.Log(question);
         }
         OnQuestionRequest?.Invoke(questions);
@@ -92,16 +96,33 @@ public class ChatControlYoutube : ChatControl
 
     protected override void SelectAction()
     {
+        PanelTalkList.OnStartChatGPT.Invoke();
         Debug.Log("ChatControlYoutube.SelectAction");
-        StartCoroutine( hatebuRequest.GetHatebuItems((list) => {
+        StartCoroutine(hatebuRequest.GetHatebuTalk((response) =>
+        {
+            var questionMessage = JsonUtility.FromJson<QuestionMessage>(response);
+            Debug.Log(questionMessage.message);
+            OnResponse?.Invoke(new TalkModel()
+            {
+                message = questionMessage.message,
+                isRight = false,
+                role = "system",
+            });
 
-            OnSelectRequest?.Invoke(list);
+            var questions = JsonUtility.FromJson<Questions>(questionMessage.question_json);
+            foreach (var question in questions.question)
+            {
+                Debug.Log(question);
+            }
+            OnQuestionRequest?.Invoke(questions);
+            PanelTalkList.OnEndChatGPT.Invoke();
         }));
     }
 
     protected override void SelectTalk(SelectButtonItem item)
     {
         Debug.Log("ChatControlYoutube.SelectTalk");
+        Debug.Log(item.title);
         StartCoroutine(SelectTalkCoroutine(item));
     }
 
@@ -116,7 +137,7 @@ public class ChatControlYoutube : ChatControl
             role = "user",
         });
 
-        http://localhost:8000/api/hatebu/url/?url=ht
+        //http://localhost:8000/api/hatebu/url/?url=ht
 
         string build_url = Define.ENDPOINT + $"api/hatebu/url?url={UnityWebRequest.EscapeURL(item.link)}";
         Debug.Log(build_url);
@@ -135,7 +156,8 @@ public class ChatControlYoutube : ChatControl
         });
 
         var questions = JsonUtility.FromJson<Questions>(questionMessage.question_json);
-        foreach(var question in questions.question){
+        foreach (var question in questions.question)
+        {
             Debug.Log(question);
         }
         OnQuestionRequest?.Invoke(questions);
