@@ -12,7 +12,10 @@ public class ChatControl : MonoBehaviour
     public static UnityEvent<TalkModel> OnResponse = new UnityEvent<TalkModel>();
     public static UnityEvent<Questions> OnQuestionRequest = new UnityEvent<Questions>();
     public static UnityEvent<List<SelectButtonItem>> OnSelectRequest = new UnityEvent<List<SelectButtonItem>>();
-    public virtual void Start(){
+    public static UnityEvent OnTalkStart = new UnityEvent();
+
+    public virtual void Start()
+    {
         PanelTalkList.OnSendTalkMessage.AddListener(SimpleTalk);
         communication = new Communication("あなたはサポートロボットのロールプレイをしてください");
 
@@ -76,14 +79,16 @@ public class ChatControl : MonoBehaviour
         });
         //Debug.Log(questionMessage.question);
         var questions = JsonUtility.FromJson<Questions>(questionMessage.question_json);
-        foreach(var question in questions.question){
+        foreach (var question in questions.question)
+        {
             Debug.Log(question);
         }
         OnQuestionRequest?.Invoke(questions);
         PanelTalkList.OnEndChatGPT.Invoke();
     }
 
-    protected IEnumerator GetJson(string api, Action<string> callback){
+    protected IEnumerator GetJson(string api, Action<string> callback)
+    {
         UnityWebRequest request = UnityWebRequest.Get(Define.ENDPOINT + api);
         yield return request.SendWebRequest();
         Debug.Log(request.downloadHandler.text);

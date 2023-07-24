@@ -3,13 +3,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Events;
 using System.Collections.Generic;
-/*
-[System.Serializable]
-public class Question{
-public string[] questions;
-}
-*/
-
 
 [System.Serializable]
 public class QuestionMessage
@@ -18,7 +11,6 @@ public class QuestionMessage
     //public Question question;
     public string question_json;
 }
-
 
 public class ChatControlYoutube : ChatControl
 {
@@ -63,6 +55,7 @@ public class ChatControlYoutube : ChatControl
 
     private IEnumerator QuestionTalk(string message)
     {
+        OnTalkStart?.Invoke();
         PanelTalkList.OnStartChatGPT.Invoke();
 
         OnResponse?.Invoke(new TalkModel()
@@ -96,6 +89,7 @@ public class ChatControlYoutube : ChatControl
 
     protected override void SelectAction()
     {
+        OnTalkStart?.Invoke();
         PanelTalkList.OnStartChatGPT.Invoke();
         Debug.Log("ChatControlYoutube.SelectAction");
         StartCoroutine(hatebuRequest.GetHatebuTalk((response) =>

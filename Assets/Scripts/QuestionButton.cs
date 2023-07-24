@@ -42,6 +42,12 @@ public class QuestionButton : MonoBehaviour
                 OnQuestionButton?.Invoke(questionMessage);
             }
         });
+
+        ChatControl.OnTalkStart.AddListener(() =>
+        {
+            GetComponent<Button>().interactable = false;
+        });
+
     }
 
 
